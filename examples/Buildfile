@@ -1,0 +1,5 @@
+target: dep1 dep2
+    gcc -c target.c -o target.o
+
+app: main.o util.o
+    gcc main.o util.o -o app
