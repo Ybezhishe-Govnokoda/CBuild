@@ -1,24 +1,27 @@
-﻿#include "dynamic_structs.h"
-#include "file_parser.h"
+﻿#include "../include/dynamic_structs.h"
+#include "../include/file_parser.h"
 
 int main()
 {
-	Rule rule;
-	rule_init(&rule);
+   RulesArray arr;
+   ra_init(&arr);
 
-	if (parse_file("Buildfile", &rule) != PARSE_OK) {
-		fprintf(stderr, "Error parsing file\n");
-		return 1;
-	}
-	else {
-		printf_s(".target: %s\n", rule.target);
-		for (int i = 0; i < rule.deps_count; i++) {
-			printf_s(" .dep: %s\n", rule.deps[i]);
-		}
-		for (int i = 0; i < rule.cmd_count; i++) {
-			printf_s(" .cmd: %s\n", rule.commands[i]);
-		}
-	}
+   if (parse_file("Buildfile", &arr) != PARSE_OK) {
+      fprintf(stderr, "Error parsing file\n");
+      return 1;
+   }
+
+   for (size_t i = 0; i < arr.count; i++) {
+      Rule *r = &arr.data[i];
+
+      printf("TARGET: %s\n", r->target);
+      for (int d = 0; d < r->deps_count; d++)
+         printf("  DEP: %s\n", r->deps[d]);
+      for (int c = 0; c < r->cmd_count; c++)
+         printf("  CMD: %s\n", r->commands[c]);
+      printf("\n");
+   }
+
+   ra_free(&arr);
 }
-
 

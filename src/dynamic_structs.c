@@ -72,6 +72,12 @@ int ds_readline(DString *s, FILE *fp) {
 
 
 // RulesArray functions
+void ra_init(RulesArray *arr) {
+   arr->data = NULL;
+   arr->count = 0;
+   arr->capacity = 0;
+}
+
 void ra_free(RulesArray *arr) {
    if (!arr) return;
 

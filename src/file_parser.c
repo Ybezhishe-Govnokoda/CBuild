@@ -83,37 +83,64 @@ inline short parse_target_line(const char *line, Rule *rule) {
    return PARSE_OK;
 }
 
-short parse_file(const char *filename, Rule *rules) {
+short parse_file(const char *filename, RulesArray *arr)
+{
    FILE *file = fopen(filename, "r");
-
-   if (file == NULL) {
+   if (!file) {
       perror("Error opening file");
       return PARSE_FILE_ERROR;
    }
 
    DString line;
    ds_init(&line);
-   rules->cmd_count = 0;
 
-   while (ds_readline(&line, file)) {
-      if (line.data[0] == '\0' || line.data[0] == '\n') continue;
+   Rule current;
+	int has_current = 0;  // Current rule existence flag
 
-      if (line.data[0] != ' ' && line.data[0] != '\t') {
-         // For target lines
-         if (parse_target_line(line.data, rules) != PARSE_OK) {
-            ds_free(&line);
+   while (ds_readline(&line, file))
+   {
+      if (line.data[0] == '\0' || line.data[0] == '\n')
+         continue;
+
+      // --- TARGET line ---
+      if (line.data[0] != ' ' && line.data[0] != '\t')
+      {
+			// If there is a current rule, save it
+         if (has_current) {
+            ra_append(arr, current);
+         }
+
+			// Start new rule
+         rule_init(&current);
+         has_current = 1;
+
+         if (parse_target_line(line.data, &current) != PARSE_OK) {
             fclose(file);
+            ds_free(&line);
             return PARSE_TARGET_ERROR;
          }
       }
-      else {
-			// For command lines
-         if (parse_command_line(line.data + 1, rules) != PARSE_OK) {
-            ds_free(&line);
+      else
+      {
+         // --- COMMAND line ---
+         if (!has_current) {
+            fprintf(stderr, "Command without target!\n");
             fclose(file);
+            ds_free(&line);
+            return PARSE_SYNTAX_ERROR;
+         }
+
+         if (parse_command_line(line.data + 1, &current) != PARSE_OK) {
+            fclose(file);
+            ds_free(&line);
             return PARSE_COMMAND_ERROR;
          }
       }
+   }
+
+	// Append the last rule if exists
+   if (has_current) {
+      ra_append(arr, current);
    }
 
    ds_free(&line);

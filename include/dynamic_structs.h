@@ -36,6 +36,7 @@ void ds_append_str(DString *s, const char *str);
 int ds_readline(DString *s, FILE *fp);
 
 // Dynamic array functions
+void ra_init(RulesArray *arr);
 void ra_free(RulesArray *arr);
 void ra_append(RulesArray *arr, Rule rule);
 
