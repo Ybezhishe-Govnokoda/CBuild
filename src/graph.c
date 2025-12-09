@@ -25,6 +25,7 @@ void graph_init(Graph *g) {
    g->vertices = NULL;
    g->count = 0;
    g->cap = 0;
+   hash_init(&g->map, 64);
 }
 
 void graph_free(Graph *g) {
@@ -35,6 +36,8 @@ void graph_free(Graph *g) {
    free(g->vertices);
    g->vertices = NULL;
    g->count = g->cap = 0;
+
+	hash_free(&g->map);
 }
 
 static int graph_reserve(Graph *g, int min_cap) {
@@ -61,22 +64,38 @@ inline Vertex *graph_find(const Graph *g, const char *name) {
 }
 
 Vertex *graph_find_or_create(Graph *g, const char *name, int *err) {
-   Vertex *v = graph_find(g, name);
+   // Try to find in hash table
+   Vertex *v = hash_get(&g->map, name);
    if (v) return v;
-   if (!graph_reserve(g, g->count + 1)) {
-      if (err) *err = 1;
-      return NULL;
-   }
-   v = vertex_create(name);
 
+	// Create new vertex if not found
+   v = vertex_create(name);
    if (!v) {
       if (err) *err = 1;
       return NULL;
    }
+
+   // Add to dynamic array of all vertices
+   if (g->count == g->cap) {
+      int newcap = g->cap ? g->cap * 2 : 16;
+      Vertex **nv = realloc(g->vertices, newcap * sizeof(Vertex *));
+      if (!nv) {
+         free(v);
+         if (err) *err = 1;
+         return NULL;
+      }
+      g->vertices = nv;
+      g->cap = newcap;
+   }
+
    g->vertices[g->count++] = v;
+
+   // Add to hash table
+   hash_insert(&g->map, name, v);
 
    return v;
 }
+
 
 int graph_add_edge(Graph *g, const char *from_name, const char *to_name) {
    int err = 0;

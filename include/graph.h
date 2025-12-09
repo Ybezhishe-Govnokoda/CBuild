@@ -2,6 +2,7 @@
 #define GRAPH_H
 
 #include "../include/dynamic_structs.h"
+#include "../include/hash_table.h"
 
 
 typedef struct Vertex {
@@ -14,9 +15,10 @@ typedef struct Vertex {
 } Vertex;
 
 typedef struct {
-   Vertex **vertices;
+	Vertex **vertices;   // Array of all vertices
    int count;
    int cap;
+   HashTable map;       // name -> Vertex*
 } Graph;
 
 

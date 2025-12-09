@@ -1,8 +1,11 @@
-﻿//#define DEBUG
+﻿#define DEBUG
+#define MAIN_TEST
+//#define HASH_TABLE_TEST
 
 #include "../include/dynamic_structs.h"
 #include "../include/file_parser.h"
 #include "../include/graph.h"
+
 
 #ifdef DEBUG
 void graph_print(Graph *g) {
@@ -38,9 +41,10 @@ void graph_print(Graph *g) {
 }
 #endif
 
-
 int main()
 {
+#ifdef MAIN_TEST
+
    RawRules arr;
    ra_init(&arr);
 
@@ -61,7 +65,7 @@ int main()
       printf("\n");
    }
 #endif // DEBUG
-
+   
    Graph graph;
    graph_init(&graph);
 
@@ -98,4 +102,28 @@ int main()
 
    ra_free(&arr);
 	graph_free(&graph);
+
+#endif // MAIN_TEST
+
+#ifdef HASH_TABLE_TEST
+	Vertex test1 = { .name = "file1.o", .rule = NULL, .deps = NULL, .dep_count = 0, .dep_cap = 0, .color = WHITE };
+	Vertex test2 = { .name = "file2.o", .rule = NULL, .deps = NULL, .dep_count = 0, .dep_cap = 0, .color = WHITE };
+	Vertex test3 = { .name = "main.o", .rule = NULL, .deps = NULL, .dep_count = 0, .dep_cap = 0, .color = WHITE };
+
+   HashTable ht;
+   hash_init(&ht, 8);
+   // Insert some entries
+   hash_insert(&ht, test1.name, &test1);
+   hash_insert(&ht, test2.name, &test2);
+   hash_insert(&ht, test3.name, &test3);
+   // Retrieve entries
+   Vertex *v1 = hash_get(&ht, "file1.o");
+   Vertex *v2 = hash_get(&ht, "file2.o");
+   Vertex *v3 = hash_get(&ht, "main.o");
+   Vertex *v4 = hash_get(&ht, "nonexistent.o");
+   printf("Retrieved: %p %p %p %p\n", (void*)v1, (void*)v2, (void*)v3, (void*)v4);
+	hash_free(&ht);
+#endif // HASH_TABLE_TEST
+
+	return 0;
 }
