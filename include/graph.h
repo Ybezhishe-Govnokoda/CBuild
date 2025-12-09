@@ -24,7 +24,8 @@ typedef enum {
    GRAPH_OK = 0, 
    GRAPH_ERR_NOMEM = -1, 
    GRAPH_ERR_CYCLE = -2,
-	GRAPH_ALREADY_IN_STACK = -3
+	GRAPH_ALREADY_IN_STACK = -3,
+	GRAPH_ERR_UNKNOWN = -4
 } graph_status;
 
 typedef enum {
@@ -36,8 +37,7 @@ typedef enum {
 void graph_init(Graph *g);
 void graph_free(Graph *g);
 
-/* Adds edge (from -> to). If there are no vertices, creates them. 
-Returns GRAPH_OK or GRAPH_ERR_NOMEM. */
+/* Adds edge (from -> to). If there are no vertices, creates them. */
 int graph_add_edge(Graph *g, const char *from_name, const char *to_name);
 
 // Find vertex by name or create it if not found. Return
@@ -51,6 +51,5 @@ int graph_topo_sort(Graph *g, Vertex ***out_order, int *out_n);
 
 /* Simple check: is there a loop in a graph*/
 int graph_has_cycle(Graph *g);
-
 
 #endif // !GRAPH_H

@@ -1,8 +1,43 @@
-﻿#include "../include/dynamic_structs.h"
+﻿//#define DEBUG
+
+#include "../include/dynamic_structs.h"
 #include "../include/file_parser.h"
 #include "../include/graph.h"
 
-//#define DEBUG
+#ifdef DEBUG
+void graph_print(Graph *g) {
+   if (!g) { printf("(null graph)\n"); return; }
+
+   printf("===== GRAPH DUMP (count=%d) =====\n", g->count);
+   for (int i = 0; i < g->count; ++i) {
+      Vertex *v = g->vertices[i];
+      printf("Vertex %d Name: '%s'\n", i, v->name ? v->name : "(null)");
+      if (v->rule) {
+         printf("  Rule target: '%s'\n", v->rule->target ? v->rule->target : "(null)");
+         printf("  Rule deps_count=%d, cmd_count=%d\n", v->rule->deps_count, v->rule->cmd_count);
+         for (int d = 0; d < v->rule->deps_count; ++d)
+            printf("    rule.dep[%d] = '%s'\n", d, v->rule->deps[d] ? v->rule->deps[d] : "(null)");
+         for (int c = 0; c < v->rule->cmd_count; ++c)
+            printf("    rule.cmd[%d] = '%s'\n", c, v->rule->commands[c] ? v->rule->commands[c] : "(null)");
+      }
+      else {
+         printf("  (no rule for this vertex — it's a file)\n");
+      }
+
+      printf("  adjacency (dep_count=%d): ", v->dep_count);
+      if (v->dep_count == 0) { printf("<none>\n"); }
+      else {
+         for (int j = 0; j < v->dep_count; ++j) {
+            printf("'%s'%s", v->deps[j]->name, j + 1 == v->dep_count ? "\n" : ", ");
+         }
+      }
+      printf("\n");
+   }
+   printf("===== END GRAPH DUMP =====\n");
+   fflush(stdout);
+}
+#endif
+
 
 int main()
 {
@@ -15,11 +50,6 @@ int main()
    }
 
 #ifdef DEBUG
-   printf("parse_file returned ok; arr.count = %zu, arr.capacity = %zu\n",
-      arr.count, arr.capacity);
-   fflush(stdout);
-#endif
-
    for (size_t i = 0; i < arr.count; i++) {
       Rule *r = &arr.data[i];
 
@@ -30,21 +60,14 @@ int main()
          printf("  CMD: %s\n", r->commands[c]);
       printf("\n");
    }
-
+#endif // DEBUG
 
    Graph graph;
    graph_init(&graph);
 
-#ifdef DEBUG
-   printf("graph.count after init = %d\n", graph.count);
-   fflush(stdout);
-#endif
-
-   /* После того как у тебя есть RulesArray arr (все правила) */
+   
    for (int i = 0; i < arr.count; ++i) {
       Rule *r = &arr.data[i];
-      // создаём вершину для цели (если не создавалась)
-      // но graph_add_edge создаст их сам. Здесь удобно связать vertex->rule.
       Vertex *v = graph_find_or_create(&graph, r->target, NULL);
       v->rule = r;
    }
@@ -56,11 +79,6 @@ int main()
          graph_add_edge(&graph, r->target, r->deps[d]);
       }
    }
-
-#ifdef DEBUG
-   printf("graph.count before topo = %d\n", graph.count);
-   fflush(stdout);
-#endif
 
    /* Теперь можно: */
    Vertex **order;
@@ -74,20 +92,9 @@ int main()
       fprintf(stderr, "Cycle detected in dependency graph\n");
    }
 
-   for (int i = 0; i < graph.count; i++)
-   {
-      printf_s("Vertex %d Name: %s\n", i, graph.vertices[i]->name);
-      printf_s("Vertex %d Rule's target: %s\n", i, graph.vertices[i]->rule->target);
-
-      for (int d = 0; d < graph.vertices[i]->rule->deps_count; d++)
-         printf("  DEP: %s\n", graph.vertices[i]->rule->deps[d]);
-      for (int c = 0; c < graph.vertices[i]->rule->cmd_count; c++)
-         printf("  CMD: %s\n", graph.vertices[i]->rule->commands[c]);
-      printf("\n");
-
-		for (int j = 0; j < graph.vertices[i]->dep_count; j++)
-         printf_s("    Dep %d: %s\n", j, graph.vertices[i]->deps[j]->name);
-   }
+#ifdef DEBUG
+   graph_print(&graph); 
+#endif // DEBUG
 
    ra_free(&arr);
 	graph_free(&graph);

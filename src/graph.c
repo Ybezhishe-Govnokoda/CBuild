@@ -63,15 +63,15 @@ inline Vertex *graph_find(const Graph *g, const char *name) {
 Vertex *graph_find_or_create(Graph *g, const char *name, int *err) {
    Vertex *v = graph_find(g, name);
    if (v) return v;
-   if (!graph_reserve(g, g->count + 1)) { 
-      if (err) *err = 1; 
-      return NULL; 
+   if (!graph_reserve(g, g->count + 1)) {
+      if (err) *err = 1;
+      return NULL;
    }
    v = vertex_create(name);
 
-   if (!v) { 
-      if (err) *err = 1; 
-      return NULL; 
+   if (!v) {
+      if (err) *err = 1;
+      return NULL;
    }
    g->vertices[g->count++] = v;
 
@@ -86,7 +86,7 @@ int graph_add_edge(Graph *g, const char *from_name, const char *to_name) {
    Vertex *to = graph_find_or_create(g, to_name, &err);
    if (!to) return GRAPH_ERR_NOMEM;
 
-   // добавить to в список зависимостей from->deps
+   // Add "to" to the list of dependencies from->deps
    if (from->dep_count + 1 > from->dep_cap) {
       int newcap = from->dep_cap ? from->dep_cap * 2 : 4;
       Vertex **nv = realloc(from->deps, sizeof(Vertex *) * newcap);
@@ -97,6 +97,7 @@ int graph_add_edge(Graph *g, const char *from_name, const char *to_name) {
    from->deps[from->dep_count++] = to;
    return GRAPH_OK;
 }
+
 
 /* DFS for cycle detection and topological sort */
 static int dfs_visit(Vertex *v, Vertex **stack, int *stack_pos) {
