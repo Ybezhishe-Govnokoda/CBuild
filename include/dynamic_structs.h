@@ -23,7 +23,18 @@ typedef struct {
    Rule *data;
    size_t count;
    size_t capacity;
-}RulesArray;
+} RawRules;
+
+typedef enum {
+	DS_OK = 0,
+	DS_ERR_NOMEM = -1,
+	DS_ERR_EOF = -2
+} d_string_status;
+
+typedef enum {
+   RA_OK = 0,
+   RA_ERR_NOMEM = -1,
+} rules_array_status;
 
 // Rule functions
 void rule_init(Rule *r);
@@ -33,12 +44,12 @@ inline void ds_init(DString *s);
 inline void ds_free(DString *s);
 void ds_append_char(DString *s, char c);
 void ds_append_str(DString *s, const char *str);
-int ds_readline(DString *s, FILE *fp);
+// Reads a line from file into DString s. Returns 1 on success, 0 on EOF.
+short ds_readline(DString *s, FILE *fp);
 
 // Dynamic array functions
-void ra_init(RulesArray *arr);
-void ra_free(RulesArray *arr);
-void ra_append(RulesArray *arr, Rule rule);
+void ra_init(RawRules *arr);
+void ra_free(RawRules *arr);
+short ra_append(RawRules *arr, Rule rule);
 
-#endif
-
+#endif // !DYNAMIC_STRUCTS_H

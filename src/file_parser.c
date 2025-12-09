@@ -83,7 +83,7 @@ inline short parse_target_line(const char *line, Rule *rule) {
    return PARSE_OK;
 }
 
-short parse_file(const char *filename, RulesArray *arr)
+short parse_file(const char *filename, RawRules *arr)
 {
    FILE *file = fopen(filename, "r");
    if (!file) {
@@ -97,7 +97,7 @@ short parse_file(const char *filename, RulesArray *arr)
    Rule current;
 	int has_current = 0;  // Current rule existence flag
 
-   while (ds_readline(&line, file))
+   while (ds_readline(&line, file) == DS_OK)
    {
       if (line.data[0] == '\0' || line.data[0] == '\n')
          continue;

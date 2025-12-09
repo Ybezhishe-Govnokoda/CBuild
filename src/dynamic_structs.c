@@ -25,11 +25,11 @@ inline void ds_free(DString *s) {
    s->len = s->cap = 0;
 }
 
-static void ds_grow(DString *s, size_t new_cap) {
+static short ds_grow(DString *s, size_t new_cap) {
    if (!(s->data = realloc(s->data, new_cap))) {
       free(s->data);
       fprintf(stderr, "Error realloc for ds_grow\n");
-      exit(1);
+		return DS_ERR_NOMEM;
    }
    s->cap = new_cap;
 }
@@ -51,7 +51,7 @@ void ds_append_str(DString *s, const char *str) {
    s->len += add;
 }
 
-int ds_readline(DString *s, FILE *fp) {
+short ds_readline(DString *s, FILE *fp) {
    ds_free(s);
    ds_init(s);
 
@@ -65,20 +65,20 @@ int ds_readline(DString *s, FILE *fp) {
 
    // EOF with no data at all
    if (c == EOF && s->len == 0)
-      return 0;
+      return DS_ERR_EOF;
 
-   return 1;
+   return DS_OK;
 }
 
 
 // RulesArray functions
-void ra_init(RulesArray *arr) {
+void ra_init(RawRules *arr) {
    arr->data = NULL;
    arr->count = 0;
    arr->capacity = 0;
 }
 
-void ra_free(RulesArray *arr) {
+void ra_free(RawRules *arr) {
    if (!arr) return;
 
    for (size_t i = 0; i < arr->count; ++i) {
@@ -99,13 +99,13 @@ void ra_free(RulesArray *arr) {
    arr->capacity = 0;
 }
 
-void ra_append(RulesArray *arr, Rule rule) {
+short ra_append(RawRules *arr, Rule rule) {
    if (arr->capacity == 0) {
       arr->capacity = sizeof(Rule);
       arr->data = malloc(arr->capacity);
       if (!arr->data) {
          perror("malloc");
-         exit(1);
+         return RA_ERR_NOMEM;
       }
    }
 
@@ -114,11 +114,10 @@ void ra_append(RulesArray *arr, Rule rule) {
       arr->data = realloc(arr->data, arr->capacity);
       if (!arr->data) {
          perror("realloc");
-         exit(1);
+         return RA_ERR_NOMEM;
       }
    }
 
    arr->data[arr->count++] = rule;
+	return RA_OK;
 }
-
-
