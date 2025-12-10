@@ -17,9 +17,10 @@ typedef struct Vertex {
    // 0 = white, 1 = gray, 2 = black
    int color;
 
-	// Results cache for is_outdated()
+	// Caching and build info for build engine
    bool checked;
    bool outdated;
+   bool built;
 } Vertex;
 
 typedef struct {
