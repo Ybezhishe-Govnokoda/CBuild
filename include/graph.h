@@ -1,24 +1,35 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#include "../include/dynamic_structs.h"
-#include "../include/hash_table.h"
+#include "utils.h" // For Rule
+#include "hash_table.h"
+#include <stdbool.h>
 
 
 typedef struct Vertex {
    char *name;
    Rule *rule;
+
    struct Vertex **deps;
    int dep_count;
    int dep_cap;
-   int color;             // 0 = white, 1 = gray, 2 = black
+
+   // 0 = white, 1 = gray, 2 = black
+   int color;
+
+	// Results cache for is_outdated()
+   bool checked;
+   bool outdated;
 } Vertex;
 
 typedef struct {
-	Vertex **vertices;   // Array of all vertices
+   // Array of all vertices
+	Vertex **vertices;
    int count;
    int cap;
-   HashTable map;       // name -> Vertex*
+
+   // name -> Vertex*
+   HashTable map;
 } Graph;
 
 
@@ -50,8 +61,5 @@ Vertex *graph_find_or_create(Graph *g, const char *name, int *err);
    out_order is allocated via malloc - the caller must free(out_order)
    If there is a loop, returns GRAPH_ERR_CYCLE. */
 int graph_topo_sort(Graph *g, Vertex ***out_order, int *out_n);
-
-/* Simple check: is there a loop in a graph*/
-int graph_has_cycle(Graph *g);
 
 #endif // !GRAPH_H

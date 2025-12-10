@@ -1,4 +1,5 @@
-#include "../include/graph.h"
+#include "graph.h"
+
 
 // Auxiliary
 static Vertex *vertex_create(const char *name) {
@@ -174,15 +175,4 @@ int graph_topo_sort(Graph *g, Vertex ***out_order, int *out_n) {
    *out_order = order;
    *out_n = g->count;
    return GRAPH_OK;
-}
-
-int graph_has_cycle(Graph *g) {
-   Vertex **tmp = NULL;
-   int n = 0;
-   int rc = graph_topo_sort(g, &tmp, &n);
-   if (rc == GRAPH_OK) {
-      free(tmp);
-      return GRAPH_OK;
-   }
-   else return rc;
 }

@@ -2,7 +2,7 @@
 #define FILE_PARSER_H
 
 #include <stdio.h>
-#include "dynamic_structs.h"
+#include "../include/utils.h"
 
 typedef enum {
 	PARSE_OK = 0,

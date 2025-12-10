@@ -2,7 +2,7 @@
 #define MAIN_TEST
 //#define HASH_TABLE_TEST
 
-#include "../include/dynamic_structs.h"
+#include "../include/utils.h"
 #include "../include/file_parser.h"
 #include "../include/graph.h"
 
